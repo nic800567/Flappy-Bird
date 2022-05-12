@@ -1,0 +1,115 @@
+kaboom()
+
+loadBean()
+loadSprite("pipe","images.png")
+loadSprite("flappy","images (2) no background.png")
+
+scene ("game", () => {
+  
+
+
+let score = 0
+const SPEED = 320
+const PIPE_OPEN = 240
+const PIPE_MIN = 60
+const CEILING = -60
+let RIGHT = 250
+const jump = 600
+let gravity = 3200
+
+const player = add([
+  sprite("bean"), //image
+  pos(50,50), //position
+  body(), //gravity
+  area({
+    "scale": 1
+  }), //collision
+])
+
+let scoreLabel = add([
+  text("0"),
+  pos(250,0),
+  z(1),
+  fixed,
+])
+
+onKeyPress("space",() => {
+  player.jump(jump)
+})
+//kaboomjs
+
+	// kaboomjs
+function spawnPipe() {
+  let h1 = rand(PIPE_MIN, height() - PIPE_MIN - PIPE_OPEN)
+let h2 = height() - h1 - PIPE_OPEN
+
+add([
+  pos(width(), 0),
+  rect(64, h1),
+  color(0, 127, 5),
+  outline(4),
+  area(),
+  move(LEFT, SPEED),
+  cleanup(),
+  "pipe",
+])
+add([
+  pos(width(), h1 + PIPE_OPEN),
+  rect(64, h2),
+  color(0, 127, 5),
+  outline(4),
+  area(),
+  move(LEFT, SPEED),
+  cleanup(),
+  "pipe",
+  { passed: false, },
+ ])
+}
+  
+player.onCollide("pipe", () => {
+  go("lose")
+})
+  
+player.onUpdate(() => {
+  if (player.pos.y >= height() || player.pos.y <= CEILING) {
+    go ("lose")
+  }
+})
+  
+onUpdate("pipe", (p) => {
+if (p.pos.x + p.width <= player.pos.x && p.passed === false) {
+	addScore()
+	p.passed = true
+  }
+})
+  loop (1, () => {
+  spawnPipe()
+ })
+  
+function addScore() {
+  score += 1
+  scoreLabel.text = score
+ }
+
+
+
+scene ("lose", () => {
+  
+add([
+  text("NEW SCORE"),
+  pos(width() / 4.5, height() / 2 - 100),
+  color(RED)
+])
+  
+add([
+  text(score),
+  pos(width() / 2, height() / 2 + 108),
+  origin("center"),
+])
+
+onKeyPress("space", () => go("game"))
+})
+  
+})
+
+go ("game")
